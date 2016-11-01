@@ -162,3 +162,109 @@
     ```
 
 [commit](https://github.com/G3F4/express-graphql-workshop/commit/d114fc80722a9a25e7fc4563bf02a93738387967)
+
+
+## Adding types to schema
+
+1. Create "types" folder in "graphql" folder. Then create "EventType.js" and "ParticipantType.js" files in it.
+    ```bash
+	cd graphql
+	mkdir types && cd touch
+	touch EventType.js ParticipantType.js
+	```
+
+2. In "EventType.js":
+    * import necessary GraphQL types and ParticipantType(we will use it to resolve event participants)
+    ```javascript
+    import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } from 'graphql';
+    import ParticipantType from './ParticipantType';
+    ```
+
+    * create new type with 3 fields:
+        * "id" of ID type, resolving static literal for now
+        * "name" of string type, resolving static literal for now
+        * "participants" type of list of ParticipantType, resolving array with empty string for now
+    ```javascript
+    const EventType = new GraphQLObjectType({
+      name: 'event',
+      fields: () => ({
+        id: {
+          type: GraphQLID,
+          resolve: () => 'id'
+        },
+        name: {
+          type: GraphQLString,
+          resolve: () => 'name'
+        },
+        participants: {
+          type: new GraphQLList(ParticipantType),
+          resolve: () => ['']
+        }
+      })
+    });
+    ```
+
+    * export EventType
+    ```javascript
+    export default EventType;
+    ```
+
+3. Do the same for "ParticipantType" with fields(import EventType instead of ParticipantType):
+    * "id" of ID type, resolving static literal for now
+    * "name" of string type, resolving static literal for now
+    * "friends" type of list of ParticipantType, resolving array with empty string for now
+    * "events" type of list of EventType, resolving array with empty string for now
+    ```javascript
+    import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } from 'graphql';
+    import EventType from './EventType';
+
+    const ParticipantType = new GraphQLObjectType({
+      name: 'participant',
+      fields: () => ({
+        id: {
+          type: GraphQLID,
+          resolve: () => 'id'
+        },
+        name: {
+          type: GraphQLString,
+          resolve: () => 'name'
+        },
+        friends: {
+          type: new GraphQLList(ParticipantType),
+          resolve: () => ['']
+        },
+        events: {
+          type: new GraphQLList(EventType),
+          resolve: () => ['']
+        }
+      })
+    });
+
+    export default ParticipantType;
+    ```
+
+4. In "query.js":
+    * import created types
+    ```javascript
+    import EventType from './types/EventType';
+    import ParticipantType from './types/ParticipantType';
+    ```
+
+    * use them in query as fields types
+    ```javascript
+    const query = new GraphQLObjectType({
+      name: 'Query',
+      fields: {
+        participant: {
+          resolve: () => 'participant',
+          type: ParticipantType,
+        },
+        event: {
+          resolve: () => 'event',
+          type: EventType,
+        }
+      }
+    });
+    ```
+
+[commit](https://github.com/G3F4/express-graphql-workshop/commit/67d27b04ba3e4d83684624077ab7b0b035da9e6d)
