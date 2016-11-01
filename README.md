@@ -330,6 +330,115 @@
     }
     ```
 
-
-
 [commit](https://github.com/G3F4/express-graphql-workshop/commit/2ba8049bab3ccf553ebe5f62ee8cece16c5191cc)
+
+
+## Adding fakeApi to serve dummy data
+
+1. Create new file in root directory "fakeApi.js".
+    ```bash
+    touch fakeApi.js
+    ```
+
+2. We need two lists: one for events and one for participants.
+    * event item in events list should be structured like below:
+    ```javascript
+    {
+      id: String // event id
+      name: String // event name
+      participantsIds: List(String) // list of participants ids
+    }
+    ```
+
+    * participant item in participants list should be structured like below:
+    ```javascript
+    {
+      id: String // event id
+      name: String // event name
+      eventsIds: List(String) // list of events ids
+      friendsIds: List(String) // list of friends ids
+    }
+    ```
+
+3. Inside "fakeApi.js":
+    * declaring dummy data
+    ```javascript
+    const DATA = {
+      participants: [{
+        id: '1',
+        name: 'Bolek',
+        friendsIds: ['2', '3'],
+        eventsIds: ['1']
+      }, {
+        id: '2',
+        name: 'Franek',
+        friendsIds: ['1'],
+        eventsIds: ['1']
+      }, {
+        id: '3',
+        name: 'Zenek',
+        friendsIds: [],
+        eventsIds: ['1', '2']
+      }],
+      events: [{
+        id: '1',
+        name: 'WarsawJS',
+        participantsIds: ['1', '2', '3']
+      }, {
+        id: '2',
+        name: 'ReactWarsaw',
+        participantsIds: ['2']
+      }, {
+        id: '3',
+        name: 'AngularWarsaw',
+        participantsIds: []
+      }]
+    };
+    ```
+
+    * declare functions returning proper event and participant by id
+    ```javascript
+    const getEvent = (id) => DATA.events.find(participant => participant.id === id);
+    const getParticipant = (id) => DATA.participants.find(event => event.id === id);
+    ```
+
+    * export functions
+    ```javascript
+    export {
+      getEvent,
+      getParticipant
+    }
+    ```
+
+4. Use fakeApi in "query.js":
+    * import fakeApi functions
+    ```javascript
+    import { getEvent, getParticipant } from '../fakeApi';
+    ```
+
+    * use them to resolve value for "event" and "participant" field, passing id from "args" argument
+    ```javascript
+    participant: {
+      ...
+      resolve: (root, args) => getParticipant(args.id),
+      ...
+    },
+    event: {
+      ...
+      resolve: (root, args) => getEvent(args.id),
+      ...
+    }
+    ```
+
+5. In "EventType.js":
+    * import getParticipant
+    ```javascript
+    import { getParticipant } from '../../fakeApi';
+    ```
+
+    * in "participant" field resolve method use getParticipant while mapping through "participantIds" from root value
+    ```javascript
+    resolve: (root) => root.participantsIds.map((id) => getParticipant(id))
+    ```
+
+[commit](https://github.com/G3F4/express-graphql-workshop/commit/a8d1698cffdc7325c7ab951c90251a57d04b42c0)
