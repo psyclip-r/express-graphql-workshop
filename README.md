@@ -169,7 +169,7 @@
 1. Create "types" folder in "graphql" folder. Then create "EventType.js" and "ParticipantType.js" files in it.
     ```bash
 	cd graphql
-	mkdir types && cd touch
+	mkdir types && cd types
 	touch EventType.js ParticipantType.js
 	```
 
